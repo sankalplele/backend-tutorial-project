@@ -113,14 +113,14 @@ const asyncHandler = (requestHandler) => {
 
 > [!IMPORTANT]
 > This extra step of asyncHandler is done only to handle errors, because async functions don’t automatically catch errors in Express
-
-```
-app.get("/user/:id", async (req, res) => {
-  const user = await someDBCall(); // ← Suppose this throws an error
-  res.json(user);
-});
-```
-
+>
+> ```
+> app.get("/user/:id", async (req, res) => {
+>  const user = await someDBCall(); // ← Suppose this throws an error
+>  res.json(user);
+> });
+> ```
+>
 > If someDBCall() throws an error or the await fails:
 > The promise is rejected.
 > But Express doesn’t know how to handle that rejection.
