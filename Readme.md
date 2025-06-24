@@ -4,7 +4,9 @@ Here I will be creating my first backend project under the guidance of Histesh C
 
 > Please explore the documentations of technologies like Express, mongoose etc.
 
-### First Lecture
+## First Lecture
+
+### Basic Setup
 
 1. Basic Setup of the project like directories for example src, inside which we have middlewares, controllers, db etc. and .env files, .gitignore files to specify which need to be ignored by git.
 
@@ -12,7 +14,9 @@ Here I will be creating my first backend project under the guidance of Histesh C
 
 3. Prettier was installed and configured as a dev dependency which helps us write consistent code, if we are using different text editors or multiple people are working on the same project. We added .prettierrc and .prettierIgnore files to configure prettier and keep a track of which files need to be ignored by prettier for formatting, respectively.
 
-### Second Lecture
+## Second Lecture
+
+### DB Connection index.js and .env intial setup
 
 1. We tried connecting to MongoDB Atlas Database. We created an index.js in db folder and used mongoose to connect to the database using the env variable of DB URL. We ensured that this connection is governed by async-await and error is handled using try catch, so that we can debug easily whenvever there is a DB connection error.
 
@@ -41,9 +45,13 @@ dotenv.config({
 });
 ```
 
-### Third Lecture
+## Third Lecture
+
+### app.js setup to use Express JS
 
 1. Coding the app.js file using Express JS. We Imported express, cookie-parser, and cors from npm, in app.js. We then used app.use() to configure things like cors and express.json, especially middlewares.
+
+### DB Connect using Express App
 
 2. Before doing all this we updated our index.js file where connectDB was called and since we know an async function returns a promise, we used == .then() and .catch() on connectDB() == to code app.listen(), i.e, to start our server when the DB is connected.
 
@@ -73,7 +81,7 @@ connectDB()
 
 3. We configured express.urlencoded to handle urlencoding
 
-4. Discussion on **Middlewares** :
+4. ### Discussion on **Middlewares** :
 
 > [!NOTE]
 > app.use([path,] callback [, callback...])
@@ -100,6 +108,8 @@ app.use((req, res, next) => {
   next()
 })
 ```
+
+### Async Handler Utility
 
 5. We will be doing plethora of async calls along with try-catch syntax, so it is super-intuitive to create a wrapper function as a utility to reduce redundancy.
 
@@ -138,6 +148,8 @@ app.get("/user/:id", async (req, res, next) => {
 });
 ```
 
+### ApiError Utility
+
 6. In our utilities folder we create an `ApiError.js` file where we created an `ApiError` class which extends `Error` class and added custom functionality to handle error.
    This is done to standardize error-handling.
 
@@ -174,6 +186,8 @@ export { ApiError };
 
 > I didnt understand very well this code
 
+### ApiResponse Utility
+
 6. Then we created ApiResponse class in the utilities, and there the highlight was the status codes of an HTTP Response
    This ApiResponse class was created to standardize the structure of the API responses:
 
@@ -192,7 +206,9 @@ class ApiResponse {
 
 7. We then need to apply checks so that all errors go through the ApiError utitlity hence created in the next lecture.
 
-### Fourth Lecture
+## Fourth Lecture
+
+### Creating Models using mongoose
 
 Now we go on to create models
 
@@ -203,11 +219,15 @@ Now we go on to create models
 
 2. Similarly we created `video.models.js`. We need to install a package called **Mongoose aggregate paginate** for using _Mongoose aggreagation pipelines_
 
+#### Model Aggregation Pipelines
+
 ```
 npm install mongoose-aggregate-paginate-v2
 ```
 
 > Learn about Mongoose Agreggation Pipelines
+
+#### Installing BCrypt and JSON Web Token
 
 Then we installed **BCrypt** for hashing and comparing passwords basically and **JWT**(JSON Web Tokens) another cryptographic library
 
@@ -215,7 +235,11 @@ Then we installed **BCrypt** for hashing and comparing passwords basically and *
 npm install bcrypt jsonwebtoken
 ```
 
-3. **_Middlewares in mongoose_**: Just before or after the data is saved, updated, deleted, etc. drom the DB, we can have middlewares, example, in mongoose we have `pre` and `post`. This will help us to process the data for tasks such as hashing, encryption or decryption.
+#### Middlewares in mongoose
+
+##### Using .pre() and .post()
+
+3.  Just before or after the data is saved, updated, deleted, etc. drom the DB, we can have middlewares, example, in mongoose we have `pre` and `post`. This will help us to process the data for tasks such as hashing, encryption or decryption.
 
 ```
 userSchema.pre("save", async function (next) {
@@ -234,7 +258,9 @@ userSchema.pre("save", async function (next) {
 > Used in password storage, file verification, digital signatures, etc.
 > On the other hand, encryption is reversible i.e. can be decrypted
 
-4. **_Defining custom methods for our models_**
+#### Defining custom methods for our models
+
+4. Here is how we can define custom methods:
 
 ```
 userSchema.methods.isPasswordCorrect = async function (password){
@@ -242,6 +268,8 @@ userSchema.methods.isPasswordCorrect = async function (password){
 return await bcrypt.compare(password, this.password)
 }
 ```
+
+#### JWT Basics
 
 5. **_JSON Web Tokens_**: It is a bearer token, _those who bear receive the data_.
    JWT stands for JSON Web Token.
@@ -284,20 +312,23 @@ JWT is secure if you:
 
 **`REFRESH_TOKEN_EXPIRY`=10d # Comment: means 10 days**
 
-### Fifth Lecture
+## Fifth Lecture
 
-**_File Upload_**
+#### File Upload using Cloudinary and Multer
+
 We will use a service called **Cloudinary** to store the image and video files and would get a link to access them.
 
 We will be using middleware for uploading this file. We could use either **express file-upload** or **Multer**.
 In this project we will be using **Multer** as a middleware to upload the files.
 
-> **_Strategy_**
->
+##### Strategy
+
 > 1. Using **Multer**, we upload file on our local server, temporarily.
 > 2. Thereafter, we upload it on the cloud.
 
 This is usually done in production-grade apps, otherwise we could directly upload the file on cloud.
+
+##### Creating `cloudinary.js`
 
 1. We create `cloudinary.js` as a utility to configure **Cloudinary**
 
@@ -341,5 +372,7 @@ const uploadOnCloudinary = async (localFilePath) => {
 export { uploadOnCloudinary };
 
 ```
+
+##### Creating `multer.middleware.js`
 
 2. Now we create the `multer.middleware.js`:
