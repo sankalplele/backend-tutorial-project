@@ -44,6 +44,7 @@ dotenv.config({
 ### Third Lecture
 
 1. Coding the app.js file using Express JS. We Imported express, cookie-parser, and cors from npm, in app.js. We then used app.use() to configure things like cors and express.json, especially middlewares.
+
 2. Before doing all this we updated our index.js file where connectDB was called and since we know an async function returns a promise, we used == .then() and .catch() on connectDB() == to code app.listen(), i.e, to start our server when the DB is connected.
 
 Our `index.js` file:
