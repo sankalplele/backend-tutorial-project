@@ -191,3 +191,95 @@ class ApiResponse {
 > Learn about status codes
 
 7. We then need to apply checks so that all errors go through the ApiError utitlity hence created in the next lecture.
+
+### Fourth Lecture
+
+Now we go on to create models
+
+> Reference
+> https://app.eraser.io/workspace/YtPqZ1VogxGy1jzIDkzj
+
+1. `user.models.js`: simply used mongoose to define the model.
+
+2. Similarly we created `video.models.js`. We need to install a package called **Mongoose aggregate paginate** for using _Mongoose aggreagation pipelines_
+
+```
+npm install mongoose-aggregate-paginate-v2
+```
+
+> Learn about Mongoose Agreggation Pipelines
+
+Then we installed **BCrypt** for hashing and comparing passwords basically and **JWT**(JSON Web Tokens) another cryptographic library
+
+```
+npm install bcrypt jsonwebtoken
+```
+
+3. **_Middlewares in mongoose_**: Just before or after the data is saved, updated, deleted, etc. drom the DB, we can have middlewares, example, in mongoose we have `pre` and `post`. This will help us to process the data for tasks such as hashing, encryption or decryption.
+
+```
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next(); // only call bcrypt.hash if the password is modified
+  this.password = bcrypt.hash(this.password, 10); // why `this` is used
+  next();
+});
+```
+
+> [!IMPORTANT]
+> BCrypt is a hashing library and not an encryption library.
+> It uses a one-way password/payload hashing algorithm and hence is non-reversible, i.e., you can find the original password using the hashed string.
+> Then how does it compare; it again applies the hash function on the password to be compared and compared the hash string with the original hashed password.
+> Hashing is a one-way, irreversible process used for verifying data integrity.
+> You can compare a hash but can’t get the original value back.
+> Used in password storage, file verification, digital signatures, etc.
+> On the other hand, encryption is reversible i.e. can be decrypted
+
+4. **_Defining custom methods for our models_**
+
+```
+userSchema.methods.isPasswordCorrect = async function (password){
+// we check the password using comparison
+return await bcrypt.compare(password, this.password)
+}
+```
+
+5. **_JSON Web Tokens_**: It is a bearer token, _those who bear receive the data_.
+   JWT stands for JSON Web Token.
+
+It is a compact, URL-safe token format used for securely transmitting information between parties (usually client ↔ server).
+
+A JWT looks like this:
+
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsIm5hbWUiOiJTYW5rYWxwIiwiaWF0IjoxNzE5MjIzMDAwfQ.0qUE9dlA3Y7o8aZlFQ1PBMQT7rgdKQTxR-7vWftEdB8
+```
+
+_It has 3 parts, separated by dots:_
+
+**Header** – contains token type and signing algorithm. It is a **Base64URL-encoded JSON**
+
+**Payload** – the data (like user id, email, role, etc.). It is also a **Base64URL-encoded JSON**
+
+**Signature** – created using your secret (e.g. `ACCESS_TOKEN_SECRET` as mentioned in you `.env` file). It is an **encrypted HMAC of header + payload + secret**
+
+JWT is secure if you:
+
+1. Sign it with a strong secret (ACCESS_TOKEN_SECRET).
+2. Use https (so token isn't sniffed in transit).
+3. Set expiration time (exp claim).
+4. Don't store it in localStorage (vulnerable to XSS); prefer http-only cookies
+
+> [!IMPORTANT]
+> JWT is not encrypted, just signed.
+> So you should not store sensitive info (like passwords) in the payload.
+
+**`ACCESS_TOKEN_EXPIRY`=1d** is set up to set the expiry of JWT tokens.
+
+**`REFRESH_TOKEN_SECRET`**: It is a secret key used to sign your refresh tokens, similar to how `ACCESS_TOKEN_SECRET` is used for signing access tokens.
+
+> **_Access Token_** > _Purpose_: Short-lived, used for accessing protected APIs
+> _Signed with_: ACCESS\*TOKEN\*SECRET
+> **_Refresh Token_** > \_Purpose\*: Long-lived, used to get new access tokens after the old one expires
+> \_Signed with\*: REFRESH_TOKEN_SECRET
+
+**`REFRESH_TOKEN_EXPIRY`=10d # Comment: means 10 days**
