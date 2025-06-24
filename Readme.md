@@ -283,3 +283,63 @@ JWT is secure if you:
 > \_Signed with\*: REFRESH_TOKEN_SECRET
 
 **`REFRESH_TOKEN_EXPIRY`=10d # Comment: means 10 days**
+
+### Fifth Lecture
+
+**_File Upload_**
+We will use a service called **Cloudinary** to store the image and video files and would get a link to access them.
+
+We will be using middleware for uploading this file. We could use either **express file-upload** or **Multer**.
+In this project we will be using **Multer** as a middleware to upload the files.
+
+> **_Strategy_**
+>
+> 1. Using **Multer**, we upload file on our local server, temporarily.
+> 2. Thereafter, we upload it on the cloud.
+
+This is usually done in production-grade apps, otherwise we could directly upload the file on cloud.
+
+1. We create `cloudinary.js` as a utility to configure **Cloudinary**
+
+```
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+```
+
+In this file, we will write the functionality of what will be done when we are having a file on our local server and we want to save it on cloud, i.e., part two of our strategy.
+
+```
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const uploadOnCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) return null;
+    // upload on cloudinary
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+    });
+
+    console.log("File uploaded successfully on cloudinary", response.url);
+    return response;
+  } catch (error) {
+    fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the upload operation got failed
+    console.error("Cloudinary upload error:", error);
+    return null;
+  }
+};
+
+export { uploadOnCloudinary };
+
+```
+
+2. Now we create the `multer.middleware.js`:
