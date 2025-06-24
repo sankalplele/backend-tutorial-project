@@ -235,9 +235,7 @@ Then we installed **BCrypt** for hashing and comparing passwords basically and *
 npm install bcrypt jsonwebtoken
 ```
 
-#### Middlewares in mongoose
-
-##### Using .pre() and .post()
+#### Middlewares in mongoose using .pre() and .post()
 
 3.  Just before or after the data is saved, updated, deleted, etc. drom the DB, we can have middlewares, example, in mongoose we have `pre` and `post`. This will help us to process the data for tasks such as hashing, encryption or decryption.
 
